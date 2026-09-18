@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chantier — planification partagée</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📐</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- Écran d'accueil : choix du nom affiché aux autres collaborateurs -->
+<div id="name-gate" class="name-gate">
+  <form id="name-form" class="name-card">
+    <span class="name-card__mark" aria-hidden="true">
+      <svg viewBox="0 0 40 40" width="34" height="34"><path d="M4 30 L16 30 L16 18 L28 18 L28 8 L36 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="30" r="2.6" fill="currentColor"/><circle cx="36" cy="8" r="2.6" fill="currentColor"/></svg>
+    </span>
+    <h1>Chantier</h1>
+    <p>Un planning que votre équipe modifie ensemble, en direct.</p>
+    <label for="name-input">Comment doit-on vous identifier&nbsp;?</label>
+    <input id="name-input" type="text" maxlength="24" placeholder="ex. Camille" autocomplete="off" required />
+    <button type="submit">Rejoindre le chantier</button>
+  </form>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="22" height="22"><path d="M4 30 L16 30 L16 18 L28 18 L28 8 L36 8" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="4" cy="30" r="3" fill="currentColor"/><circle cx="36" cy="8" r="3" fill="currentColor"/></svg>
+      </span>
+      <span class="topbar__title">Chantier</span>
+    </div>
+
+    <div class="topbar__zoom" role="group" aria-label="Échelle du planning">
+      <button type="button" class="zoom-btn" data-zoom="day">Jour</button>
+      <button type="button" class="zoom-btn" data-zoom="week">Semaine</button>
+      <button type="button" class="zoom-btn" data-zoom="month">Mois</button>
+    </div>
+
+    <div class="topbar__right">
+      <div id="presence" class="presence" aria-label="Collaborateurs connectés"></div>
+      <span id="conn-dot" class="conn-dot" title="Connexion en cours"></span>
+      <button type="button" id="btn-new-task" class="btn btn--primary">Ajouter une tâche</button>
+    </div>
+  </header>
+
+  <main class="board">
+    <aside class="sidebar">
+      <div class="sidebar__head">
+        <span>Tâches</span>
+        <span id="task-count" class="sidebar__count">0</span>
+      </div>
+      <div id="task-list" class="task-list"></div>
+    </aside>
+
+    <div class="timeline" id="timeline">
+      <div class="timeline__scroll" id="timeline-scroll">
+        <div class="timeline__ruler" id="ruler"></div>
+        <div class="timeline__body" id="chart-body">
+          <svg id="dep-layer" class="dep-layer"></svg>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Fenêtre d'édition d'une tâche -->
+<div id="modal-backdrop" class="modal-backdrop" hidden>
+  <form id="task-form" class="modal">
+    <div class="modal__head">
+      <h2 id="modal-title">Nouvelle tâche</h2>
+      <button type="button" id="modal-close" class="icon-btn" aria-label="Fermer">✕</button>
+    </div>
+
+    <label class="field">
+      <span>Nom de la tâche</span>
+      <input type="text" id="f-name" required maxlength="120" placeholder="ex. Rédaction du cahier des charges" />
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Début</span>
+        <input type="date" id="f-start" required />
+      </label>
+      <label class="field">
+        <span>Fin</span>
+        <input type="date" id="f-end" required />
+      </label>
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Avancement — <output id="f-progress-out">0</output>%</span>
+        <input type="range" id="f-progress" min="0" max="100" step="5" value="0" />
+      </label>
+      <label class="field">
+        <span>Responsable</span>
+        <input type="text" id="f-assignee" maxlength="40" placeholder="ex. Camille" />
+      </label>
+    </div>
+
+    <fieldset class="field">
+      <legend>Couleur</legend>
+      <div id="f-colors" class="color-swatches"></div>
+    </fieldset>
+
+    <label class="field" id="f-deps-wrap">
+      <span>Dépend de</span>
+      <div id="f-deps" class="deps-list"></div>
+    </label>
+
+    <label class="field">
+      <span>Notes</span>
+      <textarea id="f-notes" maxlength="800" rows="2" placeholder="Détails, liens, remarques…"></textarea>
+    </label>
+
+    <div class="modal__actions">
+      <button type="button" id="btn-delete-task" class="btn btn--danger" hidden>Supprimer</button>
+      <span class="spacer"></span>
+      <button type="button" id="btn-cancel" class="btn">Annuler</button>
+      <button type="submit" class="btn btn--primary">Enregistrer</button>
+    </div>
+  </form>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/websocket.js"></script>
+<script src="/js/gantt.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
