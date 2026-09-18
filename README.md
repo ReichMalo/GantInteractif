@@ -49,7 +49,7 @@ quelle app Node.
 
 ```bash
 # Sur le serveur
-git clone <votre-dépôt> GantInteractif && cd GantInteractif
+git clone https://github.com/ReichMalo/GantInteractif.git GantInteractif && cd GantInteractif
 npm install --omit=dev
 # Garder le process actif :
 npm install -g pm2
