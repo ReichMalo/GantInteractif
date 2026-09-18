@@ -69,3 +69,5 @@ location / {
     proxy_set_header Host $host;
 }
 ```
+
+*pensez à rajouter le state.json vide dans data/
